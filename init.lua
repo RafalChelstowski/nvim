@@ -2,6 +2,7 @@
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
+k
 =====================================================================
 
 Kickstart.nvim is *not* a distribution.
@@ -87,7 +88,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
+      { 'j-hui/fidget.nvim',       tag = 'legacy', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -109,12 +110,99 @@ require('lazy').setup({
       'rafamadriz/friendly-snippets',
     },
   },
+  {
+    'mhartington/formatter.nvim',
+    opts = {
+      config = function()
+        require("formatter").setup(
+          {
+            logging = true,
+            filetype = {
+              typescriptreact = {
+                -- prettier
+                function()
+                  return {
+                    exe = "prettier",
+                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
+                    stdin = true
+                  }
+                end
+              },
+              typescript = {
+                -- prettier
+                function()
+                  return {
+                    exe = "prettier",
+                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
+                    stdin = true
+                  }
+                end
+                -- linter
+                -- function()
+                --   return {
+                --     exe = "eslint",
+                --     args = {
+                --       "--stdin-filename",
+                --       vim.api.nvim_buf_get_name(0),
+                --       "--fix",
+                --       "--cache"
+                --     },
+                --     stdin = false
+                --   }
+                -- end
+              },
+              javascript = {
+                -- prettier
+                function()
+                  return {
+                    exe = "prettier",
+                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
+                    stdin = true
+                  }
+                end
+              },
+              javascriptreact = {
+                -- prettier
+                function()
+                  return {
+                    exe = "prettier",
+                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
+                    stdin = true
+                  }
+                end
+              },
+              json = {
+                -- prettier
+                function()
+                  return {
+                    exe = "prettier",
+                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
+                    stdin = true
+                  }
+                end
+              },
+              lua = {
+                -- luafmt
+                function()
+                  return {
+                    exe = "luafmt",
+                    args = { "--indent-count", 2, "--stdin" },
+                    stdin = true
+                  }
+                end
+              }
+            }
+          }
+        )
+      end,
+    }
+  },
 
   -- copilot
   {
     'zbirenbaum/copilot.lua',
     opts = {
-      config = function ()
+      config = function()
         require("copilot").setup({
           suggestion = { enabled = false },
           panel = { enabled = false },
@@ -125,13 +213,13 @@ require('lazy').setup({
 
   {
     "zbirenbaum/copilot-cmp",
-    config = function ()
+    config = function()
       require("copilot_cmp").setup()
     end
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',          opts = {} },
   {
     -- Adds git releated signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -145,7 +233,8 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
       on_attach = function(bufnr)
-        vim.keymap.set('n', '<leader>gp', require('gitsigns').prev_hunk, { buffer = bufnr, desc = '[G]o to [P]revious Hunk' })
+        vim.keymap.set('n', '<leader>gp', require('gitsigns').prev_hunk,
+          { buffer = bufnr, desc = '[G]o to [P]revious Hunk' })
         vim.keymap.set('n', '<leader>gn', require('gitsigns').next_hunk, { buffer = bufnr, desc = '[G]o to [N]ext Hunk' })
         vim.keymap.set('n', '<leader>ph', require('gitsigns').preview_hunk, { buffer = bufnr, desc = '[P]review [H]unk' })
       end,
@@ -153,11 +242,33 @@ require('lazy').setup({
   },
 
   {
+    -- RC set light theme
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    priority = 1000,
+  },
+
+  {
     -- RC set nightowl theme
     'oxfist/night-owl.nvim',
     priority = 1000,
-    config = function()
-      vim.cmd.colorscheme 'night-owl'
+  },
+
+  {
+    'f-person/auto-dark-mode.nvim',
+    config = {
+      update_interval = 1000,
+      set_dark_mode = function()
+        vim.api.nvim_set_option("background", "dark")
+        vim.cmd("colorscheme night-owl")
+      end,
+      set_light_mode = function()
+        vim.api.nvim_set_option("background", "light")
+        vim.cmd("colorscheme catppuccin-latte")
+      end,
+    },
+    init = function()
+      require("auto-dark-mode").init()
     end,
   },
 
@@ -187,7 +298,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',         opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
   { 'nvim-telescope/telescope.nvim', branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } },
@@ -284,8 +395,19 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
--- RC Open new tmux tab 
-vim.keymap.set('n', '<leader>tr', ':silent !tmux split-window -h<CR>', { desc = 'Open new tmux [t]e[r]minal pane in current dir' })
+
+-- RC Open new tmux pane
+vim.keymap.set('n', '<leader>tr', ':silent !tmux split-window -h<CR>',
+  { desc = 'Open new tmux [t]e[r]minal pane in current dir' })
+
+-- RC Open new tmux pane and run jest
+vim.keymap.set('n', '<leader>trj',
+  ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR ; read"<CR>',
+  { desc = 'Open new tmux [t]e[r]minal pane and run [j]est for current path file' })
+
+vim.keymap.set('n', '<leader>trjw',
+  ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR --watch ; read"<CR>',
+  { desc = 'Open new tmux [t]e[r]minal pane and run [j]est in [w]atch mode for current path file' })
 
 -- RC move selected code
 vim.keymap.set('v', '<C-S-Up>', ":m '/<-2<CR>gv=gv")
@@ -336,7 +458,7 @@ vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { de
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
--- [[ Configure Treesitter 
+-- [[ Configure Treesitter
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
@@ -437,7 +559,7 @@ local on_attach = function(_, bufnr)
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  nmap('<C-S-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -452,10 +574,11 @@ local on_attach = function(_, bufnr)
     vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
 
-  vim.api.nvim_create_autocmd("BufWritePre", {
-    buffer = bufnr,
-    command = "EslintFixAll",
-  })
+  --vim.api.nvim_create_autocmd("BufWritePre", {
+  --pattern = { '*.tsx', '*.ts', '*.jsx', '*.js' },
+  --buffer = bufnr,
+  -- command = "EslintFixAll",
+  --})
 end
 
 -- Enable the following language servers
@@ -547,7 +670,7 @@ cmp.setup {
     end, { 'i', 's' }),
   },
   sources = {
-    { name = "copilot", group_index = 2 },
+    { name = 'copilot' },
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
   },
