@@ -2,7 +2,6 @@
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
-k
 =====================================================================
 
 Kickstart.nvim is *not* a distribution.
@@ -76,6 +75,8 @@ require('lazy').setup({
   -- RC vim tmux navigation
   'christoomey/vim-tmux-navigator',
 
+  -- RC quickfix list keymaps
+  'romainl/vim-qf',
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
   {
@@ -108,96 +109,17 @@ require('lazy').setup({
 
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
+      {
+        "zbirenbaum/copilot-cmp",
+        dependencies = "copilot.lua",
+        opts = {},
+        config = function(_, opts)
+          local copilot_cmp = require("copilot_cmp")
+          copilot_cmp.setup(opts)
+        end,
+      },
     },
   },
-  {
-    'mhartington/formatter.nvim',
-    opts = {
-      config = function()
-        require("formatter").setup(
-          {
-            logging = true,
-            filetype = {
-              typescriptreact = {
-                -- prettier
-                function()
-                  return {
-                    exe = "prettier",
-                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
-                    stdin = true
-                  }
-                end
-              },
-              typescript = {
-                -- prettier
-                function()
-                  return {
-                    exe = "prettier",
-                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
-                    stdin = true
-                  }
-                end
-                -- linter
-                -- function()
-                --   return {
-                --     exe = "eslint",
-                --     args = {
-                --       "--stdin-filename",
-                --       vim.api.nvim_buf_get_name(0),
-                --       "--fix",
-                --       "--cache"
-                --     },
-                --     stdin = false
-                --   }
-                -- end
-              },
-              javascript = {
-                -- prettier
-                function()
-                  return {
-                    exe = "prettier",
-                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
-                    stdin = true
-                  }
-                end
-              },
-              javascriptreact = {
-                -- prettier
-                function()
-                  return {
-                    exe = "prettier",
-                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
-                    stdin = true
-                  }
-                end
-              },
-              json = {
-                -- prettier
-                function()
-                  return {
-                    exe = "prettier",
-                    args = { "--stdin-filepath", vim.api.nvim_buf_get_name(0) },
-                    stdin = true
-                  }
-                end
-              },
-              lua = {
-                -- luafmt
-                function()
-                  return {
-                    exe = "luafmt",
-                    args = { "--indent-count", 2, "--stdin" },
-                    stdin = true
-                  }
-                end
-              }
-            }
-          }
-        )
-      end,
-    }
-  },
-
   -- copilot
   {
     'zbirenbaum/copilot.lua',
@@ -211,15 +133,11 @@ require('lazy').setup({
     }
   },
 
-  {
-    "zbirenbaum/copilot-cmp",
-    config = function()
-      require("copilot_cmp").setup()
-    end
-  },
+  -- formatting engine / prettier
+  { 'nvimdev/guard.nvim' },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',          opts = {} },
+  { 'folke/which-key.nvim', opts = {} },
   {
     -- Adds git releated signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -385,6 +303,9 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+-- popup menu height
+vim.o.pumheight = 10
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -423,15 +344,29 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = highlight_group,
   pattern = '*',
 })
+-- quickfix
+vim.keymap.set('n', '<leader>qfc', ':call setqflist([], "r")<CR>', { desc = '[Q]uick[f]ix list [c]lear' })
+vim.keymap.set('n', '<leader>qfr', ':.Reject<CR>', { desc = '[Q]uick[f]ix list [r]eject current item' })
+vim.keymap.set('n', '<leader>qfd', ':Reject<CR>', { desc = '[Q]uick[f]ix list [d]elete items' })
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
+
+local actions = require('telescope.actions')
+
+local function send_to_quickfix(promtbufnr)
+  actions.smart_send_to_qflist(promtbufnr)
+  actions.open_qflist(promtbufnr)
+end
+
 require('telescope').setup {
   defaults = {
     mappings = {
       i = {
         ['<C-u>'] = false,
         ['<C-d>'] = false,
+        ["<C-w>"] = send_to_quickfix,
+        ["<C-q>"] = actions.send_to_qflist,
       },
     },
   },
@@ -457,6 +392,8 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
+
+-- vim.keymap.set('n', '<C-q>', require('telescope.builtin').send_selected_to_qflist, { desc = 'Send selected to quickfix' })
 
 -- [[ Configure Treesitter
 -- See `:help nvim-treesitter`
@@ -594,6 +531,7 @@ local servers = {
   rust_analyzer = {},
   tsserver = {},
   eslint = {},
+  dockerls = {},
 
   lua_ls = {
     Lua = {
@@ -630,6 +568,15 @@ mason_lspconfig.setup_handlers {
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
 local cmp = require 'cmp'
+
+local has_words_before = function()
+  if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then
+    return false
+  end
+  local line, col = vim.F.unpack_len(vim.api.nvim_win_get_cursor(0))
+  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+end
+
 local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
@@ -650,15 +597,17 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-e>'] = cmp.mapping.abort(),
     ['<C-Space>'] = cmp.mapping.complete {},
-    ['<CR>'] = cmp.mapping.confirm {
+    ['<C-s>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
+    ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
       elseif luasnip.expand_or_locally_jumpable() then
         luasnip.expand_or_jump()
+      elseif has_words_before() then
+        cmp.complete()
       else
         fallback()
       end
@@ -680,28 +629,18 @@ cmp.setup {
   },
 }
 
--- vim.api.nvim_create_autocmd(
---   {"TextChangedI", "TextChangedP"},
---   {
---     callback = function()
---       local line = vim.api.nvim_get_current_line()
---       local cursor = vim.api.nvim_win_get_cursor(0)[2]
---
---       local current = string.sub(line, cursor, cursor + 1)
---       if current == "." or current == "," or current == " " then
---         require('cmp').close()
---       end
---
---       local before_line = string.sub(line, 1, cursor + 1)
---       local after_line = string.sub(line, cursor + 1, -1)
---       if not string.match(before_line, '^%s+$') then
---         if after_line == "" or string.match(before_line, " $") or string.match(before_line, "%.$") then
---           require('cmp').complete()
---         end
---       end
---   end,
---   pattern = "*"
--- })
+local ft = require('guard.filetype')
+
+-- multiple files register
+ft('typescript,javascript,typescriptreact'):fmt('prettier')
+
+-- call setup LAST
+require('guard').setup({
+  -- the only option for the setup function
+  fmt_on_save = false,
+})
+
+vim.keymap.set({ 'n', 'v' }, '<leader>ff', '<cmd>GuardFmt<CR>')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
