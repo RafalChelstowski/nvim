@@ -71,6 +71,9 @@ require('lazy').setup({
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
+  
+  -- terminal commands in neovim
+  'tpope/vim-eunuch',
 
   -- RC vim tmux navigation
   'christoomey/vim-tmux-navigator',
