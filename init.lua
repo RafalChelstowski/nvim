@@ -71,7 +71,7 @@ require('lazy').setup({
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
-  
+
   -- terminal commands in neovim
   'tpope/vim-eunuch',
 
@@ -509,15 +509,18 @@ end
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
 local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
+  marksman = {},
+  pyright = {},
   html = {},
   rust_analyzer = {},
   tsserver = {},
   eslint = {},
+  cssls = {},
   dockerls = {},
-
+  tailwindcss = {},
+  cmake = {},
+  clangd = {},
+  wgsl_analyzer = {},
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -535,7 +538,7 @@ capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
-
+require'lspconfig'.glslls.setup{}
 mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
@@ -586,6 +589,7 @@ local ft = require('guard.filetype')
 
 -- multiple files register
 ft('typescript,javascript,typescriptreact'):fmt('prettier')
+ft('c,cpp'):fmt('clang-format')
 
 -- call setup LAST
 require('guard').setup({
