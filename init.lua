@@ -117,7 +117,13 @@ require('lazy').setup({
   { 'github/copilot.vim' },
 
   -- formatting engine / prettier
-  { 'nvimdev/guard.nvim' },
+  {
+    "nvimdev/guard.nvim",
+    -- Builtin configuration, optional
+    dependencies = {
+      "nvimdev/guard-collection",
+    },
+  },
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
@@ -538,7 +544,7 @@ capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
-require'lspconfig'.glslls.setup{}
+require 'lspconfig'.glslls.setup {}
 mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
