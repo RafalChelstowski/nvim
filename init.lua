@@ -205,13 +205,25 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim',         opts = {} },
+  { 'numToStr/Comment.nvim', opts = {} },
 
   -- underlines words under the cursor
   { 'itchyny/vim-cursorword' },
 
   -- Fuzzy Finder (files, lsp, etc)
-  { 'nvim-telescope/telescope.nvim', branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } },
+  {
+    'nvim-telescope/telescope.nvim',
+    branch = '0.1.x',
+    dependencies = { 'nvim-lua/plenary.nvim', {
+      "nvim-telescope/telescope-live-grep-args.nvim",
+      -- This will not install any breaking changes.
+      -- For major updates, this must be adjusted manually.
+      version = "^1.0.0",
+    }, },
+    config = function()
+      require("telescope").load_extension("live_grep_args")
+    end
+  },
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built.
   -- Only load if `make` is available. Make sure you have the system
@@ -316,14 +328,9 @@ vim.keymap.set('n', '<leader>tr', ':silent !tmux split-window -h<CR>',
 vim.keymap.set('n', '<leader>trj',
   ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR ; read"<CR>',
   { desc = 'Open new tmux [t]e[r]minal pane and run [j]est for current path file' })
-
 vim.keymap.set('n', '<leader>trjw',
   ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR --watch ; read"<CR>',
   { desc = 'Open new tmux [t]e[r]minal pane and run [j]est in [w]atch mode for current path file' })
-
--- RC move selected code
-vim.keymap.set('v', '<C-S-Up>', ":m '/<-2<CR>gv=gv")
-vim.keymap.set('v', '<C-S-Down>', ":m '>+1<CR>gv=gv")
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -383,6 +390,9 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
+
+-- Filtering search
+vim.keymap.set('n', '<leader>sa', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 
 -- vim.keymap.set('n', '<C-q>', require('telescope.builtin').send_selected_to_qflist, { desc = 'Send selected to quickfix' })
 
