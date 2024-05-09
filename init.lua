@@ -150,7 +150,7 @@ require('lazy').setup({
   --     end,
   --   },
   -- },
- {
+  {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -263,7 +263,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        theme = 'auto',
         component_separators = '|',
         section_separators = '',
       },
@@ -313,6 +313,8 @@ require('lazy').setup({
     end,
   },
 
+  { 'benfowler/telescope-luasnip.nvim' },
+
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -326,18 +328,18 @@ require('lazy').setup({
     'windwp/nvim-autopairs',
     event = "InsertEnter",
     opts = {} -- this is equalent to setup({}) function
-  }
+  },
 
-  -- {
-  --   -- Session manager
-  --   'rmagatti/auto-session',
-  --   config = function()
-  --     require("auto-session").setup {
-  --       log_level = "error",
-  --       auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads" },
-  --     }
-  --   end
-  -- }
+  {
+    -- Session manager
+    'rmagatti/auto-session',
+    config = function()
+      require("auto-session").setup {
+        log_level = "error",
+        auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads" },
+      }
+    end
+  }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -423,10 +425,10 @@ vim.keymap.set('n', '<leader>tr', ':silent !tmux split-window -h<CR>',
   { desc = 'Open new tmux [t]e[r]minal pane in current dir' })
 
 -- RC Open new tmux pane and run jest
+-- vim.keymap.set('n', '<leader>trj',
+--   ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR ; read"<CR>',
+--   { desc = 'Open new tmux [t]e[r]minal pane and run [j]est for current path file' })
 vim.keymap.set('n', '<leader>trj',
-  ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR ; read"<CR>',
-  { desc = 'Open new tmux [t]e[r]minal pane and run [j]est for current path file' })
-vim.keymap.set('n', '<leader>trjw',
   ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR --watch ; read"<CR>',
   { desc = 'Open new tmux [t]e[r]minal pane and run [j]est in [w]atch mode for current path file' })
 
@@ -514,6 +516,8 @@ vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
+pcall(require('telescope').load_extension, 'luasnip')
+
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
@@ -526,10 +530,11 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
+--git actions
 vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = '[S]earch git s[t]atus' })
 vim.keymap.set('n', '<leader>gg', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
-
+-- search actions
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
@@ -537,8 +542,8 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sq', require('telescope.builtin').quickfix, { desc = '[S]earch [Q]uickfix' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
-
 vim.keymap.set('n', '<leader>sb', require('telescope.builtin').builtin, { desc = '[S]earch [B]uiltin' })
+vim.keymap.set('n', '<leader>ss', require('telescope').extensions.luasnip.luasnip, { desc = '[S]earch [S]nippets' })
 
 -- Filtering search
 vim.keymap.set('n', '<leader>sa', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
@@ -734,6 +739,7 @@ mason_lspconfig.setup_handlers {
 -- See `:help cmp`
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
+require("luasnip").filetype_extend("typescript", { "javascript", "typescriptreact" })
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
 
@@ -777,7 +783,7 @@ cmp.setup {
 local ft = require('guard.filetype')
 
 -- multiple files register
-ft('typescript,javascript,typescriptreact'):fmt('prettier')
+ft('typescript,javascript,typescriptreact,json'):fmt('prettier')
 ft('c,cpp'):fmt('clang-format')
 
 -- call setup LAST
@@ -789,6 +795,12 @@ require('guard').setup({
 vim.keymap.set({ 'n', 'v' }, '<leader>ff', '<cmd>GuardFmt<CR>')
 vim.keymap.set({ 'n', 'v' }, '<leader>pp', '<cmd>w<CR><cmd>Ex<CR>')
 
+-- experimental braces
+vim.keymap.set({ 'i' }, '[[', '{')
+vim.keymap.set({ 'i' }, ']]', '}')
+
+vim.keymap.set({ 'i' }, '[[[', '(')
+vim.keymap.set({ 'i' }, ']]]', ')')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
