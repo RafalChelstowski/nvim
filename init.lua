@@ -796,11 +796,17 @@ vim.keymap.set({ 'n', 'v' }, '<leader>ff', '<cmd>GuardFmt<CR>')
 vim.keymap.set({ 'n', 'v' }, '<leader>pp', '<cmd>w<CR><cmd>Ex<CR>')
 
 -- experimental braces
-vim.keymap.set({ 'i' }, '[[', '{')
-vim.keymap.set({ 'i' }, ']]', '}')
+vim.keymap.set({ 'i' }, '[[', '(')
+vim.keymap.set({ 'i' }, ']]', ')')
 
-vim.keymap.set({ 'i' }, '[[[', '(')
-vim.keymap.set({ 'i' }, ']]]', ')')
+vim.keymap.set({ 'i' }, '[[[', '{')
+vim.keymap.set({ 'i' }, ']]]', '}')
+
+-- luasnip
+local opts = { noremap = true, silent = true }
+vim.keymap.set({ 'i', 's' }, '<C-j>', "<cmd>lua require'luasnip'.jump(1)<CR>", opts)
+vim.keymap.set({ 'i', 's' }, '<C-k>', "<cmd>lua require'luasnip'.jump(-1)<CR>", opts)
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
