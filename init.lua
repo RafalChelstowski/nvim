@@ -99,8 +99,9 @@ require('lazy').setup({
     },
   },
 
+
+  -- Autocompletion
   {
-    -- Autocompletion
     'hrsh7th/nvim-cmp',
     dependencies = {
       -- Snippet Engine & its associated nvim-cmp source
@@ -115,8 +116,24 @@ require('lazy').setup({
     },
   },
 
+  -- completion source for copilot
   {
-    'github/copilot.vim'
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+      })
+    end,
+  },
+
+  {
+    "zbirenbaum/copilot-cmp",
+    config = function()
+      require("copilot_cmp").setup()
+    end
   },
 
   -- formatting engine / prettier
@@ -774,9 +791,9 @@ cmp.setup {
     end),
   },
   sources = {
-    -- { name = 'copilot' },
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
+    { name = 'nvim_lsp', group_index = 2 },
+    { name = "copilot",  group_index = 2 },
+    { name = 'luasnip',  group_index = 2 },
   },
 }
 
