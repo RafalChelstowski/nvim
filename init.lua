@@ -760,7 +760,10 @@ require("luasnip").filetype_extend("typescript", { "javascript", "typescriptreac
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
 
+vim.o.completeopt = "menuone,noselect,preview"
+
 cmp.setup {
+  preselect = cmp.PreselectMode.None,
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
@@ -773,28 +776,39 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
+      behavior = cmp.ConfirmBehavior.Insert,
+      select = false,
     },
-    ['<C-e>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.mapping.confirm {
-          behavior = cmp.ConfirmBehavior.Replace,
-          select = true,
-        }
+    ["<C-e>"] = cmp.mapping(function()
+      cmp.select_next_item()
+      cmp.confirm {
+        behavior = cmp.ConfirmBehavior.Insert,
+        select = true,
+      }
+    end, { "i", "s" }),
+    ["<Tab>"] = cmp.mapping(function(fallback)
+      if luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
       else
         fallback()
       end
-      --     vim.cmd([[
-      -- "GuardFmt<CR>"
-      -- ]])
-    end),
+    end, { "i", "s" }),
+    ["<S-Tab>"] = cmp.mapping(function(fallback)
+      if luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { "i", "s" }),
   },
   sources = {
     { name = 'nvim_lsp', group_index = 2 },
-    { name = "copilot",  group_index = 2 },
     { name = 'luasnip',  group_index = 2 },
+    { name = "copilot",  group_index = 2 },
   },
+  completion = {
+    keyword_length = 0,
+  }
 }
 
 local ft = require('guard.filetype')
