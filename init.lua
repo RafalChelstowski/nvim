@@ -257,14 +257,14 @@ require('lazy').setup({
 
   {
     'f-person/auto-dark-mode.nvim',
-    config = {
-      update_interval = 1000,
+    opts = {
+      update_interval = 100000,
       set_dark_mode = function()
-        vim.api.nvim_set_option("background", "dark")
+        vim.api.nvim_set_option_value("background", "dark", {})
         vim.cmd("colorscheme night-owl")
       end,
       set_light_mode = function()
-        vim.api.nvim_set_option("background", "light")
+        vim.api.nvim_set_option_value("background", "light", {})
         vim.cmd("colorscheme catppuccin-latte")
       end,
     },
@@ -707,7 +707,7 @@ local servers = {
   pyright = {},
   html = {},
   rust_analyzer = {},
-  tsserver = {},
+  ts_ls = {},
   eslint = {},
   cssls = {},
   dockerls = {},
@@ -818,12 +818,12 @@ ft('typescript,javascript,typescriptreact,json'):fmt('prettier')
 ft('c,cpp'):fmt('clang-format')
 
 -- call setup LAST
-require('guard').setup({
-  -- the only option for the setup function
+vim.g.guard_config = {
+  -- format on write to buffer
   fmt_on_save = false,
-})
+}
 
-vim.keymap.set({ 'n', 'v' }, '<leader>ff', '<cmd>GuardFmt<CR>')
+vim.keymap.set({ 'n', 'v' }, '<leader>ff', '<cmd>Guard fmt<CR>')
 vim.keymap.set({ 'n', 'v' }, '<leader>pp', '<cmd>w<CR><cmd>Ex<CR>')
 
 -- experimental braces
