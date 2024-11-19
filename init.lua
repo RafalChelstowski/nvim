@@ -356,7 +356,9 @@ require('lazy').setup({
         auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads" },
       }
     end
-  }
+  },
+
+  { 'artemave/workspace-diagnostics.nvim' }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -837,6 +839,15 @@ vim.keymap.set({ 'i' }, ']]]', '}')
 local opts = { noremap = true, silent = true }
 vim.keymap.set({ 'i', 's' }, '<C-j>', "<cmd>lua require'luasnip'.jump(1)<CR>", opts)
 vim.keymap.set({ 'i', 's' }, '<C-k>', "<cmd>lua require'luasnip'.jump(-1)<CR>", opts)
+
+vim.keymap.set('n', '<space>xx', '', {
+  noremap = true,
+  callback = function()
+    for _, client in ipairs(vim.lsp.buf_get_clients()) do
+      require("workspace-diagnostics").populate_workspace_diagnostics(client, 0)
+    end
+  end
+})
 
 
 -- The line beneath this is called `modeline`. See `:help modeline`
