@@ -533,6 +533,18 @@ end
 
 vim.api.nvim_create_user_command('LiveGrepGitRoot', live_grep_git_root, {})
 
+-- Custom buffers function to search in current tab's cwd
+local function buffers_in_tab_cwd()
+  local cwd = vim.fn.expand('%:p:h')
+  if cwd then
+    require('telescope.builtin').buffers {
+      cwd = cwd,
+    }
+  end
+end
+
+vim.api.nvim_create_user_command('BuffersInTabCwd', buffers_in_tab_cwd, {})
+
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
 pcall(require('telescope').load_extension, 'luasnip')
@@ -540,7 +552,8 @@ pcall(require('telescope').load_extension, 'luasnip')
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
+vim.keymap.set('n', '<leader><space>', ':BuffersInTabCwd<cr>', { desc = '[S]earch in current buffer' })
+vim.keymap.set('n', '<leader>sa', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -565,7 +578,7 @@ vim.keymap.set('n', '<leader>sb', require('telescope.builtin').builtin, { desc =
 vim.keymap.set('n', '<leader>ss', require('telescope').extensions.luasnip.luasnip, { desc = '[S]earch [S]nippets' })
 
 -- Filtering search
-vim.keymap.set('n', '<leader>sa', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
+-- vim.keymap.set('n', '<leader>sa', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
