@@ -147,26 +147,6 @@ require('lazy').setup({
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim',  opts = {} },
-  -- {
-  --   -- Adds git releated signs to the gutter, as well as utilities for managing changes
-  --   'lewis6991/gitsigns.nvim',
-  --   opts = {
-  --     -- See `:help gitsigns.txt`
-  --     signs = {
-  --       add = { text = '+' },
-  --       change = { text = '~' },
-  --       delete = { text = '_' },
-  --       topdelete = { text = '‾' },
-  --       changedelete = { text = '~' },
-  --     },
-  --     on_attach = function(bufnr)
-  --       vim.keymap.set('n', '<leader>gp', require('gitsigns').prev_hunk,
-  --         { buffer = bufnr, desc = '[G]o to [P]revious Hunk' })
-  --       vim.keymap.set('n', '<leader>gn', require('gitsigns').next_hunk, { buffer = bufnr, desc = '[G]o to [N]ext Hunk' })
-  --       vim.keymap.set('n', '<leader>ph', require('gitsigns').preview_hunk, { buffer = bufnr, desc = '[P]review [H]unk' })
-  --     end,
-  --   },
-  -- },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -258,7 +238,7 @@ require('lazy').setup({
   {
     'f-person/auto-dark-mode.nvim',
     opts = {
-      update_interval = 100000,
+      update_interval = 500000,
       set_dark_mode = function()
         vim.api.nvim_set_option_value("background", "dark", {})
         vim.cmd("colorscheme night-owl")
@@ -348,17 +328,50 @@ require('lazy').setup({
   },
 
   {
-    -- Session manager
-    'rmagatti/auto-session',
-    config = function()
-      require("auto-session").setup {
-        log_level = "error",
-        auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads" },
-      }
-    end
+    "kawre/neotab.nvim",
+    event = "InsertEnter",
+    opts = {
+      tabkey = "<Tab>",
+      act_as_tab = true,
+      behavior = "nested", ---@type ntab.behavior
+      pairs = { ---@type ntab.pair[]
+        { open = "(", close = ")" },
+        { open = "[", close = "]" },
+        { open = "{", close = "}" },
+        { open = "'", close = "'" },
+        { open = '"', close = '"' },
+        { open = "`", close = "`" },
+        { open = "<", close = ">" },
+      },
+      exclude = {},
+      smart_punctuators = {
+        enabled = false,
+        semicolon = {
+          enabled = false,
+          ft = { "cs", "c", "cpp", "java" },
+        },
+        escape = {
+          enabled = false,
+          triggers = {}, ---@type table<string, ntab.trigger>
+        },
+      },
+    }
   },
 
-  { 'artemave/workspace-diagnostics.nvim' }
+  {
+    "dhruvasagar/vim-prosession",
+    dependencies = {
+      "tpope/vim-obsession",
+    },
+  },
+
+  { 'artemave/workspace-diagnostics.nvim' },
+
+  {
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" }
+  }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -548,12 +561,12 @@ vim.api.nvim_create_user_command('BuffersInTabCwd', buffers_in_tab_cwd, {})
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
 pcall(require('telescope').load_extension, 'luasnip')
-
+pcall(require('telescope').load_extension, 'prosession')
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader><space>', ':BuffersInTabCwd<cr>', { desc = '[S]earch in current buffer' })
-vim.keymap.set('n', '<leader>sa', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
+vim.keymap.set('n', '<leader>sa', ':BuffersInTabCwd<cr>', { desc = '[S]earch in current buffer' })
+vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -576,6 +589,7 @@ vim.keymap.set('n', '<leader>sq', require('telescope.builtin').quickfix, { desc 
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 vim.keymap.set('n', '<leader>sb', require('telescope.builtin').builtin, { desc = '[S]earch [B]uiltin' })
 vim.keymap.set('n', '<leader>ss', require('telescope').extensions.luasnip.luasnip, { desc = '[S]earch [S]nippets' })
+vim.keymap.set('n', '<Leader>sp', '<cmd>Telescope prosession<CR>')
 
 -- Filtering search
 -- vim.keymap.set('n', '<leader>sa', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
@@ -862,6 +876,35 @@ vim.keymap.set('n', '<space>xx', '', {
   end
 })
 
+local harpoon = require("harpoon")
+
+-- REQUIRED
+harpoon:setup()
+-- REQUIRED
+
+harpoon:extend({
+  UI_CREATE = function(cx)
+    vim.keymap.set("n", "<C-v>", function()
+      harpoon.ui:select_menu_item({ vsplit = true })
+    end, { buffer = cx.bufnr })
+
+    vim.keymap.set("n", "<C-x>", function()
+      harpoon.ui:select_menu_item({ split = true })
+    end, { buffer = cx.bufnr })
+
+    vim.keymap.set("n", "<C-t>", function()
+      harpoon.ui:select_menu_item({ tabedit = true })
+    end, { buffer = cx.bufnr })
+  end,
+})
+
+vim.keymap.set("n", "<leader>aa", function() harpoon:list():add() end)
+vim.keymap.set("n", "<leader>ac", function() harpoon:list():clear() end)
+vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+
+-- Toggle previous & next buffers stored within Harpoon list
+vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
+vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
