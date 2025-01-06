@@ -331,10 +331,10 @@ require('lazy').setup({
     "kawre/neotab.nvim",
     event = "InsertEnter",
     opts = {
-      tabkey = "<Tab>",
+      tabkey = "<C-t>",
       act_as_tab = true,
-      behavior = "nested", ---@type ntab.behavior
-      pairs = { ---@type ntab.pair[]
+      behavior = "nested",
+      pairs = {
         { open = "(", close = ")" },
         { open = "[", close = "]" },
         { open = "{", close = "}" },
@@ -352,10 +352,17 @@ require('lazy').setup({
         },
         escape = {
           enabled = false,
-          triggers = {}, ---@type table<string, ntab.trigger>
+          triggers = {},
         },
       },
-    }
+    },
+  },
+  {
+    "L3MON4D3/LuaSnip",
+    keys = function()
+      -- Disable default tab keybinding in LuaSnip
+      return {}
+    end,
   },
 
   {
@@ -364,8 +371,6 @@ require('lazy').setup({
       "tpope/vim-obsession",
     },
   },
-
-  { 'artemave/workspace-diagnostics.nvim' },
 
   {
     "ThePrimeagen/harpoon",
@@ -561,7 +566,6 @@ vim.api.nvim_create_user_command('BuffersInTabCwd', buffers_in_tab_cwd, {})
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
 pcall(require('telescope').load_extension, 'luasnip')
-pcall(require('telescope').load_extension, 'prosession')
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
@@ -589,7 +593,6 @@ vim.keymap.set('n', '<leader>sq', require('telescope.builtin').quickfix, { desc 
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 vim.keymap.set('n', '<leader>sb', require('telescope.builtin').builtin, { desc = '[S]earch [B]uiltin' })
 vim.keymap.set('n', '<leader>ss', require('telescope').extensions.luasnip.luasnip, { desc = '[S]earch [S]nippets' })
-vim.keymap.set('n', '<Leader>sp', '<cmd>Telescope prosession<CR>')
 
 -- Filtering search
 -- vim.keymap.set('n', '<leader>sa', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
@@ -815,6 +818,14 @@ cmp.setup {
         select = true,
       }
     end, { "i", "s" }),
+    ["<C-q>"] = cmp.mapping(function()
+      cmp.select_next_item()
+      cmp.confirm {
+        behavior = cmp.ConfirmBehavior.Insert,
+        select = true,
+      }
+      vim.api.nvim_input(vim.api.nvim_replace_termcodes("<Esc>", true, false, true))
+    end, { "i", "s" }),
     ["<Tab>"] = cmp.mapping(function(fallback)
       if luasnip.expand_or_jumpable() then
         luasnip.expand_or_jump()
@@ -867,15 +878,6 @@ local opts = { noremap = true, silent = true }
 vim.keymap.set({ 'i', 's' }, '<C-j>', "<cmd>lua require'luasnip'.jump(1)<CR>", opts)
 vim.keymap.set({ 'i', 's' }, '<C-k>', "<cmd>lua require'luasnip'.jump(-1)<CR>", opts)
 
-vim.keymap.set('n', '<space>xx', '', {
-  noremap = true,
-  callback = function()
-    for _, client in ipairs(vim.lsp.buf_get_clients()) do
-      require("workspace-diagnostics").populate_workspace_diagnostics(client, 0)
-    end
-  end
-})
-
 local harpoon = require("harpoon")
 
 -- REQUIRED
@@ -898,9 +900,9 @@ harpoon:extend({
   end,
 })
 
-vim.keymap.set("n", "<leader>aa", function() harpoon:list():add() end)
-vim.keymap.set("n", "<leader>ac", function() harpoon:list():clear() end)
-vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+vim.keymap.set("n", "<leader>ha", function() harpoon:list():add() end)
+vim.keymap.set("n", "<leader>hc", function() harpoon:list():clear() end)
+vim.keymap.set("n", "<leader>hh", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
 
 -- Toggle previous & next buffers stored within Harpoon list
 vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
