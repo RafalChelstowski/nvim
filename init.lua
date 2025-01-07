@@ -376,6 +376,10 @@ require('lazy').setup({
     "ThePrimeagen/harpoon",
     branch = "harpoon2",
     dependencies = { "nvim-lua/plenary.nvim" }
+  },
+
+  {
+    "voldikss/vim-floaterm"
   }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -907,6 +911,27 @@ vim.keymap.set("n", "<leader>hh", function() harpoon.ui:toggle_quick_menu(harpoo
 -- Toggle previous & next buffers stored within Harpoon list
 vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
 vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
+
+-- Floaterm
+vim.keymap.set({ 'n' }, '<F3>', ":FloatermNew<CR>", { noremap = true, silent = true })
+vim.keymap.set({ 't' }, '<F3>', vim.api.nvim_replace_termcodes('<C-\\><C-n>:FloatermNew<CR>', true, false, true),
+  { noremap = true, silent = true })
+
+vim.keymap.set({ 'n' }, '<F4>', ":FloatermToggle<CR>", { noremap = true, silent = true })
+vim.keymap.set({ 't' }, '<F4>', vim.api.nvim_replace_termcodes('<C-\\><C-n>:FloatermToggle<CR>', true, false, true),
+  { noremap = true, silent = true })
+
+vim.keymap.set({ 'n' }, '<F5>', ":FloatermKill<CR>", { noremap = true, silent = true })
+vim.keymap.set({ 't' }, '<F5>', vim.api.nvim_replace_termcodes('<C-\\><C-n>:FloatermKill<CR>', true, false, true),
+  { noremap = true, silent = true })
+
+vim.keymap.set({ 'n' }, '<F7>', ":FloatermPrev<CR>", { noremap = true, silent = true })
+vim.keymap.set({ 't' }, '<F7>', vim.api.nvim_replace_termcodes('<C-\\><C-n>:FloatermPrev<CR>', true, false, true),
+  { noremap = true, silent = true })
+
+vim.keymap.set({ 'n' }, '<F8>', ":FloatermNext<CR>", { noremap = true, silent = true })
+vim.keymap.set({ 't' }, '<F8>', vim.api.nvim_replace_termcodes('<C-\\><C-n>:FloatermNext<CR>', true, false, true),
+  { noremap = true, silent = true })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
