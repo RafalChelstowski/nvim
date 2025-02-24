@@ -380,7 +380,16 @@ require('lazy').setup({
 
   {
     "voldikss/vim-floaterm"
-  }
+  },
+
+  { "tpope/vim-surround" },
+
+  { "easymotion/vim-easymotion" },
+
+{
+    "zirrostig/vim-schlepp",
+    keys = { { "<Plug>SchleppUp", mode = "v" }, { "<Plug>SchleppDown", mode = "v" } },
+  },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -465,13 +474,12 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 vim.keymap.set('n', '<leader>tr', ':silent !tmux split-window -h<CR>',
   { desc = 'Open new tmux [t]e[r]minal pane in current dir' })
 
--- RC Open new tmux pane and run jest
--- vim.keymap.set('n', '<leader>trj',
---   ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR ; read"<CR>',
---   { desc = 'Open new tmux [t]e[r]minal pane and run [j]est for current path file' })
 vim.keymap.set('n', '<leader>trj',
   ':let $VIM_DIR=expand("%:p")<CR> :silent !tmux split-window -h "yarn jest $VIM_DIR --watch ; read"<CR>',
   { desc = 'Open new tmux [t]e[r]minal pane and run [j]est in [w]atch mode for current path file' })
+
+vim.keymap.set('v', '<C-k>', '<Plug>SchleppUp', { noremap = true })
+vim.keymap.set('v', '<C-j>', '<Plug>SchleppDown', { noremap = true })
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -573,8 +581,7 @@ pcall(require('telescope').load_extension, 'luasnip')
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
-vim.keymap.set('n', '<leader>sa', ':BuffersInTabCwd<cr>', { desc = '[S]earch in current buffer' })
-vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
+vim.keymap.set('n', '<leader>sb', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -585,7 +592,7 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 
 --git actions
 vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = '[S]earch git s[t]atus' })
+vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status, { desc = '[S]earch git [s]tatus' })
 vim.keymap.set('n', '<leader>gg', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
 -- search actions
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
@@ -595,7 +602,7 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sq', require('telescope.builtin').quickfix, { desc = '[S]earch [Q]uickfix' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
-vim.keymap.set('n', '<leader>sb', require('telescope.builtin').builtin, { desc = '[S]earch [B]uiltin' })
+vim.keymap.set('n', '<leader>st', require('telescope.builtin').builtin, { desc = '[S]earch [T]elescope Builtin' })
 vim.keymap.set('n', '<leader>ss', require('telescope').extensions.luasnip.luasnip, { desc = '[S]earch [S]nippets' })
 
 -- Filtering search
@@ -702,8 +709,8 @@ local on_attach = function(_, bufnr)
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
-  nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
-  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+  nmap('gd', vim.lsp.buf.definition, '[G]oto [d]efinition')
+  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [r]eferences')
   nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
   nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
   nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
@@ -808,8 +815,6 @@ cmp.setup {
   mapping = cmp.mapping.preset.insert {
     ['<C-n>'] = cmp.mapping.select_next_item(),
     ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Insert,
